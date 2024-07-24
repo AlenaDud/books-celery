@@ -1,0 +1,58 @@
+version: "3.8"
+
+services:
+    # Django Service
+    django:
+        build:
+            context: .
+        container_name: books_reader
+        volumes:
+            - .:/app
+        ports:
+            - "8000:8000"
+        environment:
+            - DEBUG=1
+            - CELERY_BROKER=redis://redis:6379/0
+            - CELERY_BACKEND=redis://redis:6379/0
+        depends_on:
+            - db
+            - redis
+
+    # Celery Service
+    celery:
+        build: .
+        command: celery -A books_reader worker -l INFO
+        volumes:
+            - .:/app
+        environment:
+            - DEBUG=1
+            - DJANGO_ALLOWED_HOSTS=localhost 127.0.0.1 [::1]
+            - CELERY_BROKER=redis://redis:6379/0
+            - CELERY_BACKEND=redis://redis:6379/0
+        depends_on:
+            - django
+            - redis
+
+    # PostgreSQL Database Service
+    db:
+        container_name: book_db
+        image: postgres:14
+        ports:
+          - 32700:5432
+        volumes:
+          - ./data:/var/lib/postgresql/data
+        environment:
+          POSTGRES_USER: root
+          POSTGRES_PASSWORD: root
+          POSTGRES_DB: book
+
+    # Redis Service
+    redis:
+        image: "redis:alpine"
+        container_name: cache
+        ports:
+            - 6379:6379
+
+# Define a named volume for PostgreSQL data storage
+volumes:
+    pgdata:
