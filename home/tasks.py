@@ -1,17 +1,17 @@
 from celery import shared_task
 from .models import Book, Category
-from django.contrib.auth.models import User
+from .models import User
 from django.core.mail import send_mail
 
 
 @shared_task
-def upload_books(user_id, books_data):
+def upload_books(user_id, books_data, categories_data):
     user = User.objects.get(id=user_id)
     book_titles = []
-    for book_data in books_data:
-        categories = book_data.pop('category')
+    for idx, book_data in enumerate(books_data):
+        categories = categories_data[idx]
         book = Book.objects.create(**book_data, user=user)
-        book.category.set(Category.objects.filter(slug__in=categories))
+        book.category.set(Category.objects.filter(id__in=categories.get('id')))
         book.save()
         book_titles.append(book.title)
 

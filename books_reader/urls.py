@@ -16,10 +16,18 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from home.views import UserDetailAPI, RegisterUserAPIView
+from django.contrib.sitemaps.views import sitemap
+from home.site_maps import sitemaps
+
 from .api import router
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include(router.urls)),
-    path('api/drf-auth/', include('rest_framework.urls'))
+    path('api/drf-auth/', include('rest_framework.urls')),
+    path("get-details/", UserDetailAPI.as_view()),
+    path('register/', RegisterUserAPIView.as_view()),
+    path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, name='django.contrib.sitemaps.views.sitemap'),
 ]

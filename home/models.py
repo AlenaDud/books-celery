@@ -1,12 +1,11 @@
-from django.db import models
 from django.contrib.auth.models import User
-# Create your models here.
+from django.db import models
+
 
 class Category(models.Model):
     name = models.CharField(max_length=200)
     slug = models.SlugField(max_length=200,
-                        unique=True)
-
+                            unique=True)
 
     class Meta:
         ordering = ['name']
@@ -16,7 +15,6 @@ class Category(models.Model):
         verbose_name = 'category'
         verbose_name_plural = 'categories'
 
-
     def __str__(self):
         return self.name
 
@@ -24,7 +22,7 @@ class Category(models.Model):
 class Book(models.Model):
     title = models.CharField(max_length=255)
     author = models.CharField(max_length=255)
-    photo = models.ImageField(upload_to='book_photos/')
+    photo = models.ImageField(upload_to='book_photos/', null=True, blank=True)
     description = models.TextField()
     rating = models.PositiveIntegerField()
     category = models.ManyToManyField(Category, related_name='books')
@@ -41,3 +39,6 @@ class Book(models.Model):
 
     def __str__(self):
         return self.title
+
+    def get_absolute_url(self):
+        return "/books/" + str(self.title)
